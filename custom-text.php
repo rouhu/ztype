@@ -52,7 +52,7 @@ if (strlen($customText) < 50) {
             height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
         }
         
         /* Hide the custom text content */
