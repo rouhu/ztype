@@ -522,11 +522,17 @@
                 return;
             }
             
+            // Prompt for password
+            const password = prompt('Enter password to delete:');
+            if (!password) {
+                return; // User cancelled
+            }
+            
             try {
                 const response = await fetch('/api/wordsets.php', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                    body: `action=delete&id=${id}`
+                    body: `action=delete&id=${id}&password=${encodeURIComponent(password)}`
                 });
                 
                 const data = await response.json();

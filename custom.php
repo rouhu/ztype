@@ -152,6 +152,19 @@ if ($url) {
         // Enable document mode for custom text
         window.ZTypeDocumentMode = true;
         window.ZTYPE_FLAGS = <?php echo $flags; ?>;
+        
+        // Directly inject fragments to bypass document scanner
+        window.ZTypeCustomFragments = <?php 
+            $fragmentsArray = [];
+            $lines = preg_split('/\r?\n/', $customText);
+            foreach ($lines as $line) {
+                $trimmedLine = preg_replace('/\s+/', ' ', trim($line));
+                if (!empty($trimmedLine)) {
+                    $fragmentsArray[] = $trimmedLine;
+                }
+            }
+            echo json_encode($fragmentsArray);
+        ?>;
     </script>
     
     <script type="text/javascript" src="ztype.min.js?v22" charset="UTF-8"></script>
@@ -173,8 +186,19 @@ if ($url) {
     </div>
     
     <!-- Custom text content (hidden but scanned by game) -->
-    <div id="custom-text-content">
-        <?php echo htmlspecialchars($customText, ENT_QUOTES, 'UTF-8'); ?>
+    <!-- Each sentence in its own paragraph to ensure separate scanning -->
+    <div id="custom-text-container" style="position: fixed; top: -10000px; left: 0; width: 1px; height: 1px; overflow: hidden;">
+    <?php 
+    // Split by line breaks and wrap each line in a separate paragraph
+    $lines = preg_split('/\r?\n/', $customText);
+    foreach ($lines as $line) {
+        // Remove ALL line breaks and extra whitespace from each line
+        $trimmedLine = preg_replace('/\s+/', ' ', trim($line));
+        if (!empty($trimmedLine)) {
+            echo '<p class="ztype-sentence">' . htmlspecialchars($trimmedLine, ENT_QUOTES, 'UTF-8') . '</p>' . "\n";
+        }
+    }
+    ?>
     </div>
     
     <!-- Game canvas -->

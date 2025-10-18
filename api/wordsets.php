@@ -120,11 +120,10 @@ function saveWordset() {
 }
 
 /**
- * Load a specific wordset
+ * Load a specific wordset (accessible to all users)
  */
 function loadWordset() {
     $pdo = getDB();
-    $sessionId = getSessionID();
     
     $id = intval($_GET['id'] ?? 0);
     
@@ -136,13 +135,10 @@ function loadWordset() {
         $stmt = $pdo->prepare("
             SELECT id, name, text_content, source_url, flags, play_count, created
             FROM saved_wordsets
-            WHERE id = :id AND session_id = :session_id
+            WHERE id = :id
         ");
         
-        $stmt->execute([
-            ':id' => $id,
-            ':session_id' => $sessionId
-        ]);
+        $stmt->execute([':id' => $id]);
         
         $wordset = $stmt->fetch();
         
@@ -162,22 +158,20 @@ function loadWordset() {
 }
 
 /**
- * List all wordsets for current session
+ * List all wordsets (visible to all users)
  */
 function listWordsets() {
     $pdo = getDB();
-    $sessionId = getSessionID();
     
     try {
         $stmt = $pdo->prepare("
             SELECT id, name, source_url, flags, play_count, created, last_played,
                    CHAR_LENGTH(text_content) as text_length
             FROM saved_wordsets
-            WHERE session_id = :session_id
             ORDER BY last_played DESC, created DESC
         ");
         
-        $stmt->execute([':session_id' => $sessionId]);
+        $stmt->execute();
         $wordsets = $stmt->fetchAll();
         
         return [
@@ -192,28 +186,30 @@ function listWordsets() {
 }
 
 /**
- * Delete a wordset
+ * Delete a wordset (password protected, accessible to all users)
  */
 function deleteWordset() {
     $pdo = getDB();
-    $sessionId = getSessionID();
     
     $id = intval($_POST['id'] ?? 0);
+    $password = $_POST['password'] ?? '';
     
     if (!$id) {
         return ['error' => 'Wordset ID is required'];
     }
     
+    // Verify password
+    if ($password !== DELETE_PASSWORD) {
+        return ['error' => 'Invalid password'];
+    }
+    
     try {
         $stmt = $pdo->prepare("
             DELETE FROM saved_wordsets
-            WHERE id = :id AND session_id = :session_id
+            WHERE id = :id
         ");
         
-        $stmt->execute([
-            ':id' => $id,
-            ':session_id' => $sessionId
-        ]);
+        $stmt->execute([':id' => $id]);
         
         if ($stmt->rowCount() > 0) {
             return [
@@ -231,11 +227,10 @@ function deleteWordset() {
 }
 
 /**
- * Update play count for a wordset
+ * Update play count for a wordset (accessible to all users)
  */
 function updatePlayCount() {
     $pdo = getDB();
-    $sessionId = getSessionID();
     
     $id = intval($_POST['id'] ?? 0);
     
@@ -248,13 +243,10 @@ function updatePlayCount() {
             UPDATE saved_wordsets
             SET play_count = play_count + 1,
                 last_played = NOW()
-            WHERE id = :id AND session_id = :session_id
+            WHERE id = :id
         ");
         
-        $stmt->execute([
-            ':id' => $id,
-            ':session_id' => $sessionId
-        ]);
+        $stmt->execute([':id' => $id]);
         
         return ['success' => true];
         

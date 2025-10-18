@@ -20,9 +20,7 @@ if (strlen($customText) < 50) {
     exit;
 }
 
-// Clean up the text
-$customText = preg_replace('/\s+/', ' ', $customText);
-$customText = trim($customText);
+// Keep line breaks intact - we need them to separate sentences!
 ?>
 <!DOCTYPE html>
 <html>
@@ -100,6 +98,19 @@ $customText = trim($customText);
         // Enable document mode for custom text
         window.ZTypeDocumentMode = true;
         window.ZTYPE_FLAGS = <?php echo $flags; ?>;
+        
+        // Directly inject fragments to bypass document scanner
+        window.ZTypeCustomFragments = <?php 
+            $fragmentsArray = [];
+            $lines = preg_split('/\r?\n/', $customText);
+            foreach ($lines as $line) {
+                $trimmedLine = preg_replace('/\s+/', ' ', trim($line));
+                if (!empty($trimmedLine)) {
+                    $fragmentsArray[] = $trimmedLine;
+                }
+            }
+            echo json_encode($fragmentsArray);
+        ?>;
     </script>
     
     <script type="text/javascript" src="ztype.min.js?v22" charset="UTF-8"></script>
@@ -108,16 +119,11 @@ $customText = trim($customText);
     <!-- Overlay for scanning animation -->
     <div id="ztype-overlay" class="ztype-scanning">
         <div style="text-align: center; color: #4dfed2;">
-            <div style="font-size: 24px; margin-bottom: 20px;">SCANNING TEXT...</div>
+            <div style="font-size: 24px; margin-bottom: 20px;">LOADING...</div>
             <div style="width: 300px; background: rgba(255,255,255,0.1); height: 4px; border-radius: 2px;">
                 <div id="ztype-scan-progress"></div>
             </div>
         </div>
-    </div>
-    
-    <!-- Custom text content (hidden but scanned by game) -->
-    <div id="custom-text-content">
-        <p><?php echo htmlspecialchars($customText, ENT_QUOTES, 'UTF-8'); ?></p>
     </div>
     
     <!-- Game canvas -->

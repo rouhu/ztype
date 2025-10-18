@@ -12,6 +12,7 @@ define('DB_PASS', 'your_db_password');
 define('SCREENSHOT_DIR', __DIR__ . '/../screenshots/');
 define('MAX_STATS_PER_USER', 30);
 define('STATS_EXCERPT_LIMIT', 100);
+define('DELETE_PASSWORD', 'your_delete_password'); // Password required to delete word sets
 
 // Database connection
 function getDB() {
