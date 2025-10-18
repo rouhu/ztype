@@ -44,8 +44,8 @@ if ($content === false) {
 // Strip HTML tags and extract text
 $text = strip_tags($content);
 
-// Clean up whitespace, preserving line breaks as separators
-$text = preg_replace('/[ \t\r]+/', ' ', $text);
+// Clean up whitespace
+$text = preg_replace('/\s+/', ' ', $text);
 $text = trim($text);
 
 // Check minimum length

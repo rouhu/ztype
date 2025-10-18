@@ -20,17 +20,9 @@ if (strlen($customText) < 50) {
     exit;
 }
 
-// Process sentences to be treated as single words
-$lines = explode("\n", $customText);
-$processedLines = [];
-foreach ($lines as $line) {
-    $trimmedLine = trim($line);
-    if (!empty($trimmedLine)) {
-        // Replace spaces with non-breaking spaces
-        $processedLines[] = str_replace(' ', "\xC2\xA0", $trimmedLine);
-    }
-}
-$customText = implode(' ', $processedLines);
+// Clean up the text
+$customText = preg_replace('/\s+/', ' ', $customText);
+$customText = trim($customText);
 ?>
 <!DOCTYPE html>
 <html>

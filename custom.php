@@ -26,19 +26,11 @@ if ($url) {
         if ($content !== false) {
             // Strip HTML tags and get text content
             $customText = strip_tags($content);
-            // Process sentences to be treated as single words
-            $lines = explode("\n", $customText);
-            $processedLines = [];
-            foreach ($lines as $line) {
-                $trimmedLine = trim($line);
-                if (!empty($trimmedLine)) {
-                    // Replace spaces with non-breaking spaces
-                    $processedLines[] = str_replace(' ', "\xC2\xA0", $trimmedLine);
-                }
-            }
-            $customText = implode(' ', $processedLines);
         }
     }
+} else {
+    // Fallback to posted data if no URL
+    $customText = isset($_POST['text']) ? $_POST['text'] : '';
 }
 
 // If no text loaded, show error
@@ -51,6 +43,37 @@ if (empty($customText)) {
 if (strlen($customText) < 100) {
     header('Location: /load.php?error=tooshort');
     exit;
+}
+
+// Process sentences to be treated as single words
+$wordsByLength = [];
+
+if ($url) {
+    // For URL-based text, split into words
+    $words = preg_split('/[\s,]+/', $customText);
+    foreach ($words as $word) {
+        $word = trim($word);
+        if (!empty($word)) {
+            $len = strlen($word);
+            if (!isset($wordsByLength[$len])) {
+                $wordsByLength[$len] = [];
+            }
+            $wordsByLength[$len][] = $word;
+        }
+    }
+} else {
+    // For pasted text, split by newlines
+    $lines = explode("\n", $customText);
+    foreach ($lines as $line) {
+        $trimmedLine = trim($line);
+        if (!empty($trimmedLine)) {
+            $len = strlen($trimmedLine);
+            if (!isset($wordsByLength[$len])) {
+                $wordsByLength[$len] = [];
+            }
+            $wordsByLength[$len][] = $trimmedLine;
+        }
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -132,6 +155,11 @@ if (strlen($customText) < 100) {
     </script>
     
     <script type="text/javascript" src="ztype.min.js?v22" charset="UTF-8"></script>
+
+    <script type="text/javascript">
+        // Override the WORDS object with our custom sentences
+        window.WORDS = <?php echo json_encode($wordsByLength); ?>;
+    </script>
 </head>
 <body>
     <!-- Overlay for scanning animation -->
