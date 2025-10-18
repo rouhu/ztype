@@ -26,9 +26,17 @@ if ($url) {
         if ($content !== false) {
             // Strip HTML tags and get text content
             $customText = strip_tags($content);
-            // Clean up whitespace
-            $customText = preg_replace('/\s+/', ' ', $customText);
-            $customText = trim($customText);
+            // Process sentences to be treated as single words
+            $lines = explode("\n", $customText);
+            $processedLines = [];
+            foreach ($lines as $line) {
+                $trimmedLine = trim($line);
+                if (!empty($trimmedLine)) {
+                    // Replace spaces with non-breaking spaces
+                    $processedLines[] = str_replace(' ', "\xC2\xA0", $trimmedLine);
+                }
+            }
+            $customText = implode(' ', $processedLines);
         }
     }
 }
