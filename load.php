@@ -350,7 +350,7 @@
                 <div style="text-align: center; margin: 20px 0; color: #999;">— OR —</div>
                 
                 <div class="input-group">
-                    <label for="text">Paste your own text</label>
+                    <label for="text">Paste your own text (one sentence per line)</label>
                     <textarea id="text" name="text" placeholder="Type or paste any text here..."></textarea>
                 </div>
                 
